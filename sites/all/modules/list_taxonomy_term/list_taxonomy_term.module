@@ -1,0 +1,263 @@
+<?php
+
+/*Implementation of hook_block_info()*/
+function list_taxonomy_term_block_info() {
+    $blocks['list_tags'] = array(
+        'info' => t('[NVS] Block List Tags on sidebar'),
+    );
+    $blocks['list_blog_categories'] = array(
+        'info' => t('[NVS] Block List Blog Categories on sidebar'),
+    );
+    return $blocks;
+}
+
+/*Implementation of hook_block_configure()*/
+function list_taxonomy_term_block_configure($delta = '') {
+
+    $form = array();
+    switch ($delta) {
+		//FOOTER
+		case 'list_tags':
+            $form['list_tags_record_qt']  = array(
+                '#type' => 'select',
+                '#title' => t('Number of records'),
+                '#options' => drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40)),
+                '#default_value' => variable_get('list_tags_record_qt', 1),
+            );
+            $form['list_tags_order_by'] = array(
+                '#type' => 'select',
+                '#title' => t('Order by'),
+                '#options' => array(
+                    'none' => t('Default'),
+                    'name' => t('Name'),
+                    'RAND()' => t('Random'),
+                    ),
+                '#default_value' => variable_get('list_tags_order_by', 'RAND()'),
+            );
+            $form['list_tags_sort_by'] = array(
+                '#type' => 'select',
+                '#title' => t('Sort by'),
+                '#options' => array(
+                    'ASC' => t('Ascending'),
+                    'DESC' => t('Descending'),
+                    ),
+                '#default_value' => variable_get('list_tags_sort_by', 'DESC'),
+            );
+        break;
+        case 'list_blog_categories':
+            $form['list_blog_categories_record_qt']  = array(
+                '#type' => 'select',
+                '#title' => t('Number of records'),
+                '#options' => drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40)),
+                '#default_value' => variable_get('list_blog_categories_record_qt', 1),
+            );
+            $form['list_blog_categories_order_by'] = array(
+                '#type' => 'select',
+                '#title' => t('Order by'),
+                '#options' => array(
+                    'none' => t('Default'),
+                    'name' => t('Name'),
+                    'RAND()' => t('Random'),
+                    ),
+                '#default_value' => variable_get('list_blog_categories_order_by', 'RAND()'),
+            );
+            $form['list_blog_categories_sort_by'] = array(
+                '#type' => 'select',
+                '#title' => t('Sort by'),
+                '#options' => array(
+                    'ASC' => t('Ascending'),
+                    'DESC' => t('Descending'),
+                    ),
+                '#default_value' => variable_get('list_blog_categories_sort_by', 'DESC'),
+            );
+        break;
+    }
+
+    return $form;
+}
+
+/*Implementation of hook_block_save()*/
+
+function list_taxonomy_term_block_save($delta = '', $edit = array()) {
+    switch ($delta) {
+		//FOOTER
+		case 'list_tags':
+            variable_set('list_tags_record_qt', $edit['list_tags_record_qt']);
+            variable_set('list_tags_order_by', $edit['list_tags_order_by']);
+            variable_set('list_tags_sort_by', $edit['list_tags_sort_by']);
+        break;
+        case 'list_blog_categories':
+            variable_set('list_blog_categories_record_qt', $edit['list_blog_categories_record_qt']);
+            variable_set('list_blog_categories_order_by', $edit['list_blog_categories_order_by']);
+            variable_set('list_blog_categories_sort_by', $edit['list_blog_categories_sort_by']);
+        break;
+    }
+}
+
+/*Implementation of hook_block_view()*/
+
+function list_taxonomy_term_block_view($delta = '') {
+    // This example is adapted from node.module.
+    $block = array();
+
+    switch ($delta) {
+        case 'list_tags':
+            $block['title'] = list_taxonomy_term_block_get_title($delta);
+            $block['content'] = getTags(variable_get('list_tags_record_qt'),variable_get('list_tags_order_by'),variable_get('list_tags_sort_by'));
+            
+        break;
+        case 'list_blog_categories':
+            $block['title'] = list_taxonomy_term_block_get_title($delta);
+            $block['content'] = getBlogCategories(variable_get('list_blog_categories_record_qt'),variable_get('list_blog_categories_order_by'),variable_get('list_blog_categories_sort_by'));
+            
+        break;
+		
+    }
+    return $block;
+}
+
+/*Implementation of hook_theme()*/
+function list_taxonomy_term_theme($existing, $type, $theme, $path) {
+    return array(
+		
+		//FOOTER
+		'list_tags' => array(
+            'variables' => array('settings' => array('list_tags_order_by' => NULL,'list_tags_record_qt' => NULL,'list_tags_sort_by' => NULL)),
+        ),
+        'list_blog_categories' => array(
+            'variables' => array('settings' => array('list_blog_categories_order_by' => NULL,'list_blog_categories_record_qt' => NULL,'list_blog_categories_sort_by' => NULL)),
+        ),
+    );
+}
+/*function list_taxonomy_term_block_list_tags_content(){
+    //return getCategories();
+}*/
+function list_taxonomy_term_block_get_title($delta) {
+  $block = db_query('SELECT title FROM {block} WHERE delta = :delta', array(':delta' => $delta))->fetchObject();
+  return $block->title ? $block->title : '';
+}
+
+
+function list_taxonomy_term_trim_text($alter, $value) {
+	if (drupal_strlen($value) > $alter['max_length']) {
+		$value = drupal_substr($value, 0, $alter['max_length']);
+		// TODO: replace this with cleanstring of ctools
+		if (!empty($alter['word_boundary'])) {
+			$regex = "(.*)\b.+";
+			if (function_exists('mb_ereg')) {
+				mb_regex_encoding('UTF-8');
+				$found = mb_ereg($regex, $value, $matches);
+			} else {
+				$found = preg_match("/$regex/us", $value, $matches);
+			}
+			if ($found) {
+				$value = $matches[1];
+			}
+		}
+		// Remove scraps of HTML entities from the end of a strings
+		$value = rtrim(preg_replace('/(?:<(?!.+>)|&(?!.+;)).*$/us', '', $value));
+		
+		if (!empty($alter['ellipsis'])) {
+			$value .= t('...');
+		}
+	}
+	if (!empty($alter['html'])) {
+		$value = _filter_htmlcorrector($value);
+	}
+
+	return $value;
+}
+
+function getTags($list_taxonomy_term_record_qt,$list_taxonomy_term_order_by,$list_taxonomy_term_sort_by){
+
+        if($list_taxonomy_term_order_by == 'none'){
+            $tids = db_query("SELECT *
+                FROM 
+                {taxonomy_term_data} taxonomy_term_data
+                LEFT JOIN {taxonomy_vocabulary} taxonomy_vocabulary ON taxonomy_term_data.vid = taxonomy_vocabulary.vid
+                WHERE taxonomy_vocabulary.machine_name = 'tags'
+                LIMIT $list_taxonomy_term_record_qt OFFSET 0")->fetchCol();
+        }elseif($list_taxonomy_term_order_by == 'name'){
+            $tids = db_query("SELECT *
+                FROM 
+                {taxonomy_term_data} taxonomy_term_data
+                LEFT JOIN {taxonomy_vocabulary} taxonomy_vocabulary ON taxonomy_term_data.vid = taxonomy_vocabulary.vid
+                WHERE taxonomy_vocabulary.machine_name = 'tags'
+                ORDER BY taxonomy_term_data.name $list_taxonomy_term_sort_by
+                LIMIT $list_taxonomy_term_record_qt OFFSET 0")->fetchCol();
+        }else{
+            $tids = db_query("SELECT *
+                FROM 
+                {taxonomy_term_data} taxonomy_term_data
+                LEFT JOIN {taxonomy_vocabulary} taxonomy_vocabulary ON taxonomy_term_data.vid = taxonomy_vocabulary.vid
+                WHERE taxonomy_vocabulary.machine_name = 'tags'
+                ORDER BY $list_taxonomy_term_order_by $list_taxonomy_term_sort_by
+                LIMIT $list_taxonomy_term_record_qt OFFSET 0")->fetchCol();
+        }
+
+        $terms = taxonomy_term_load_multiple($tids);
+
+
+    
+    //print_r(getListProductCategories($list_product_categories_record_qt,$list_product_categories_order_by,$list_product_categories_sort_by));
+
+    //$terms = getTags($list_tags_record_qt,$list_tags_order_by,$list_tags_sort_by);
+        //print_r(taxonomy_get_vocabularies());
+        $out = '';
+        $out .= '<ul>';
+        foreach ($terms as $term) {
+            $term_uri = taxonomy_term_uri($term);
+            $term_path = $term_uri['path'];
+            //output custom here
+            $link = l($term->name,$term_path);
+            $out .= '<li>'.$link.'</li>';
+        }
+        $out .= '</ul>'; 
+        return $out;  
+    }
+function getBlogCategories($list_blog_categories_record_qt,$list_blog_categories_order_by,$list_blog_categories_sort_by){
+    if($list_blog_categories_order_by == 'none'){
+        $tids = db_query("SELECT *
+            FROM 
+            {taxonomy_term_data} taxonomy_term_data
+            LEFT JOIN {taxonomy_vocabulary} taxonomy_vocabulary ON taxonomy_term_data.vid = taxonomy_vocabulary.vid
+            WHERE taxonomy_vocabulary.machine_name = 'blog_categories'
+            LIMIT $list_blog_categories_record_qt OFFSET 0")->fetchCol();
+    }elseif($list_blog_categories_order_by == 'name'){
+        $tids = db_query("SELECT *
+            FROM 
+            {taxonomy_term_data} taxonomy_term_data
+            LEFT JOIN {taxonomy_vocabulary} taxonomy_vocabulary ON taxonomy_term_data.vid = taxonomy_vocabulary.vid
+            WHERE taxonomy_vocabulary.machine_name = 'blog_categories'
+            ORDER BY taxonomy_term_data.name $list_blog_categories_sort_by
+            LIMIT $list_blog_categories_record_qt OFFSET 0")->fetchCol();
+    }else{
+        $tids = db_query("SELECT *
+            FROM 
+            {taxonomy_term_data} taxonomy_term_data
+            LEFT JOIN {taxonomy_vocabulary} taxonomy_vocabulary ON taxonomy_term_data.vid = taxonomy_vocabulary.vid
+            WHERE taxonomy_vocabulary.machine_name = 'blog_categories'
+            ORDER BY $list_blog_categories_order_by $list_blog_categories_sort_by
+            LIMIT $list_blog_categories_record_qt OFFSET 0")->fetchCol();
+    }
+
+    $terms = taxonomy_term_load_multiple($tids);
+
+
+
+//print_r(getListProductCategories($list_product_categories_record_qt,$list_product_categories_order_by,$list_product_categories_sort_by));
+
+//$terms = getTags($list_tags_record_qt,$list_tags_order_by,$list_tags_sort_by);
+    //print_r(taxonomy_get_vocabularies());
+    $out = '';
+    $out .= '<ul>';
+    foreach ($terms as $term) {
+        $term_uri = taxonomy_term_uri($term);
+        $term_path = $term_uri['path'];
+        //output custom here
+        $link = l($term->name,$term_path);
+        $out .= '<li>'.$link.'</li>';
+    }
+    $out .= '</ul>'; 
+    return $out;  
+}

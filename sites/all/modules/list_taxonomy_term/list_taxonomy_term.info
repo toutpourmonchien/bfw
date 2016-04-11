@@ -1,0 +1,4 @@
+name = NaviTeam List taxonomy term
+description = List taxonomy term
+core = 7.x
+package = NAVITEAM

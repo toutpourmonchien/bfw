@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ *   Handles updates for the Get Content Type module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function list_tags_uninstall() {
+  variable_del('list_tags_record_qt');
+  variable_del('list_tags_order_by');
+  variable_del('list_tags_sort_by');
+}

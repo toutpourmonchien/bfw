@@ -1,0 +1,45 @@
+name = 'Towns'
+description = 'Best theme with onepage'
+package = 'Core'
+version = 'VERSION'
+core = '7.x'
+screenshot = screenshot.png
+
+;css
+
+stylesheets[all][] = css/reset.css
+stylesheets[all][] = css/bootstrap.css
+stylesheets[all][] = css/bootstrap-responsive.css
+stylesheets[all][] = css/prettyPhoto.css
+stylesheets[all][] = css/font-awesome.css
+stylesheets[all][] = css/style.css
+stylesheets[all][] = css/slider.css
+;stylesheets[all][] = assets/css/theme-green-1.css
+stylesheets[all][] = css/update.css
+
+;js
+scripts[] = js/jquery-1.7.2.min.js
+scripts[] = js/jquery.prettyPhoto.js
+scripts[] = js/jquery.scrollTo.js
+scripts[] = js/carousel.js
+scripts[] = js/retina.js
+scripts[] = js/jquery.nav.js
+scripts[] = js/modernizr.custom.js
+scripts[] = js/jquery.isotope.min.js
+scripts[] = js/jquery.theme.plugins.min.js
+scripts[] = js/jquery.themepunch.slider.js
+scripts[] = js/styleswitcher.js
+scripts[] = js/custom.js
+scripts[] = js/update.js
+
+;regions
+regions[main_menu] = 'Main menu'
+regions[slider] = 'Slider'
+regions[content] = 'Main content'
+regions[section] = 'Section content'
+regions[sidebar_first] = 'Sidebar first'
+regions[sidebar_second] = 'Sidebar second'
+regions[footer_column_1] = 'Footer column 1'
+regions[footer_column_2] = 'Footer column 2'
+regions[footer_column_3] = 'Footer column 3'
+regions[footer_column_4] = 'Footer column 4'
