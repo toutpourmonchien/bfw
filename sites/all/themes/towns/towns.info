@@ -16,6 +16,7 @@ stylesheets[all][] = css/style.css
 stylesheets[all][] = css/slider.css
 ;stylesheets[all][] = assets/css/theme-green-1.css
 stylesheets[all][] = css/update.css
+stylesheets[all][] = less/style.less
 
 ;js
 scripts[] = js/jquery-1.7.2.min.js
