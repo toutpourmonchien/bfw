@@ -1,0 +1,5 @@
+name = VTC Tools
+description = Features for calculating distances and Traffic
+core = 7.x
+version = 7.x-1.0
+package = VTC

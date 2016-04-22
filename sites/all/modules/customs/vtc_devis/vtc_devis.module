@@ -1,0 +1,227 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ */
+function vtc_devis_menu() {
+  $items['devis'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vtc_devis_form'),
+    'access arguments' => array('access content'),
+  );
+
+  return $items;
+}
+
+function vtc_devis_block_info() {
+  $blocks = array();
+  $blocks['vtc_devis_form'] = array(
+    'info' => t('BFW devis calculate form'),
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function vtc_devis_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'vtc_devis_form':
+      $block['subject'] = '';
+      $block['content'] = drupal_get_form('vtc_devis_form');
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_form().
+ */
+function vtc_devis_form($form, &$form_state) {
+
+  $form['firstname'] = array(
+    '#type' => 'textfield',
+    '#required' => true,
+    '#title' => t('Firstname'),
+    '#title_display' => 'invisible',
+    '#attributes' => array(
+      'placeholder' => t('Firstname'),
+    ),
+  );
+
+  $form['lastname'] = array(
+    '#type' => 'textfield',
+    '#required' => true,
+    '#title' => t('Lastname'),
+    '#title_display' => 'invisible',
+    '#attributes' => array(
+      'placeholder' => t('Lastname'),
+    ),
+  );
+
+  $form['phone'] = array(
+    '#type' => 'textfield',
+    '#required' => true,
+    '#title' => t('Phone number'),
+    '#title_display' => 'invisible',
+    '#attributes' => array(
+      'placeholder' => t('Phone number'),
+    ),
+  );
+
+  $form['email'] = array(
+    '#type' => 'textfield',
+    '#required' => true,
+    '#title' => t('Email'),
+    '#title_display' => 'invisible',
+    '#attributes' => array(
+      'placeholder' => t('Email'),
+    ),
+  );
+
+  $form['from'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Start Address'),
+    '#title_display' => 'invisible',
+    '#autocomplete_path' => 'actency-maps/autocomplete',
+    '#default_value' => $form_state['values']['from'],
+    '#attributes' => array(
+      'placeholder' => t('Start Address'),
+    ),
+    '#required' => true,
+  );
+
+
+  $form['to'] = array(
+    '#type' => 'textfield',
+    '#title' => t('End Address'),
+    '#title_display' => 'invisible',
+    '#autocomplete_path' => 'actency-maps/autocomplete',
+    '#default_value' => $form_state['values']['to'],
+    '#attributes' => array(
+      'placeholder' => t('End Address'),
+    ),
+    '#required' => true,
+  );
+
+  $form['when'] = array(
+    '#title' => t('Pour le'),
+    '#type' => 'date_popup',
+    '#date_label_position' => 'invisible',
+    '#attributes' => array(
+      'placeholder' => t('Date de la course'),
+      'class' => array('start-date'),
+    ),
+    '#date_format' => 'd/m/Y',
+    '#date_type' => DATE_DATETIME,
+    '#default_value' => '',
+    '#required' => true,
+  );
+
+  $form['time'] = array(
+    '#title' => t('Heure'),
+    '#type' => 'date_select',
+    '#date_label_position' => 'invisible',
+    '#attributes' => array(
+      'placeholder' => t('Heure de la course'),
+      'class' => array('start-date'),
+    ),
+    '#date_format' => 'g:i',
+    '#date_increment' => 15,
+    '#default_value' => '',
+    '#required' => true,
+  );
+
+  $form['nb_personnes'] = array(
+    '#type' => 'textfield',
+    '#required' => true,
+    '#title' => t('Number of persons'),
+    '#title_display' => 'invisible',
+    '#attributes' => array(
+      'placeholder' => t('Number of persons'),
+    ),
+  );
+
+  $form['nb_bagages'] = array(
+    '#type' => 'textfield',
+    '#required' => true,
+    '#title' => t('Number of suitcases'),
+    '#title_display' => 'invisible',
+    '#attributes' => array(
+      'placeholder' => t('Number of suitcases'),
+    ),
+  );
+
+  $form['calculer'] = array(
+    '#type' => 'submit',
+    '#value' => t('Calculer le prix'),
+    '#ajax' => array(
+      'callback' => '_vtc_devis_calculate',
+      'wrapper' => 'vtc-devis-form',
+      'validate' => 'vtc_devis_form_validate',
+    ),
+  );
+
+
+  $form['#rebuild'] = TRUE;
+
+  return $form;
+}
+
+function _vtc_devis_calculate($form, $form_state) {
+  $errors = form_get_errors();
+  if (empty($errors)) {
+    _vtc_devis_calculate_price($form, $form_state);
+    if (isset($form_state['distancematrix'])) {
+      $data = $form_state['distancematrix'];
+      $form['markup'] = array(
+        '#markup' => t('La distance entre @origin et @destination est de @num',
+          array(
+            '@origin' => $data->origin_addresses[0],
+            '@destination' => $data->destination_addresses[0],
+            '@num' => $data->rows[0]->elements[0]->distance->text,
+          )),
+      );
+    }
+    if (isset($form_state['price'])) {
+      $form['price'] = array(
+        '#field_prefix' => '<h2>',
+        '#field_suffix' => '</h2>',
+        '#markup' => t('La prix de votre course est estimé à @price €',
+          array(
+            '@price' => $form_state['price'],
+          )),
+      );
+    }
+    $form['valider'] = array(
+      '#type' => 'submit',
+      '#value' => t('Valider ma demande'),
+    );
+  }
+  return $form;
+}
+
+function _vtc_devis_calculate_price(&$form, &$form_state) {
+  $values = $form_state['values'];
+  unset($form_state['distancematrix']);
+  if (!empty($values['from']) && !empty($values['to'])) {
+    $data = vtc_gtools_get_km_beetween_two_places($values['from'], $values['to']);
+    if ($data->status == 'OK') {
+      $km = ($data->rows[0]->elements[0]->distance->value / 1000);
+      $form_state['distancematrix'] = $data;
+      $form_state['km'] = $km;
+    }
+  }
+  if (!empty($values['time'])) {
+    $times = explode(':', $values['time']);
+    if (!empty($km)) {
+      $forfait = variable_get('vtc_price_unit_price', 2);
+      $unit_price = vtc_price_unit_price_by_hour($times[0]);
+      $price = vtc_price_generate_price($forfait, $unit_price, $km);
+      $price = round ( $price , 2 );
+      $form_state['price'] = $price;
+    }
+  }
+}

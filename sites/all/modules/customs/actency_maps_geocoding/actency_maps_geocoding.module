@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * Implements hook_permission().
+ */
+function actency_maps_geocoding_permission() {
+  return array(
+    'access geocoding autocomplete' => array('title' => t('Access <em>Geocoder Autocomplete</em>')),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function actency_maps_geocoding_menu() {
+  $items['actency-maps/autocomplete'] = array(
+    'page callback' => 'actency_maps_geocoding_autocomplete',
+    'access arguments' => array('access geocoding autocomplete'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback.
+ */
+function actency_maps_geocoding_autocomplete($string = '') {
+  $matches = array();
+
+  if ($string !== '') {
+    $query = array(
+      'input' => $string,
+      'language' => 'fr',
+      'key' => variable_get('vtc_api_key_places', ''),
+    );
+    $uri = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
+    $url = url($uri, array('query' => $query));
+    $response = drupal_http_request($url);
+    $data = json_decode($response->data);
+    if ($data->status == 'OK') {
+      foreach ($data->predictions as $result) {
+        if (!empty($result->description)) {
+          $matches[$result->description] = '<div class="reference-autocomplete">' . check_plain($result->description) . '</div>';
+        }
+      }
+    }
+    else {
+      $matches['all'] = '<div class="reference-autocomplete">' . check_plain(t('Unable to active Places')) . '</div>';
+    }
+  }
+  drupal_json_output($matches);
+}
+
+/*
+ * Cette fonction permet d'appeler la fonction google_geocode uniquement si le cache n'est pas utilisé pour le reverse
+ * geocoding d'une localisation
+ */
+function _actency_maps_geocode_cache($place) {
+  $key = '_actency_maps_geocode_'.md5($place);
+  $cache = cache_get($key);
+  if (!empty($cache->data)) {
+    return $cache->data;
+  }
+  else {
+    watchdog('actency_gmap', 'Appel de Google Places pour la recherche tournoi avec parametre '.$place);
+    $result = gmap_geocode($place);
+    cache_set($key, $result);
+  }
+  return $result;
+}

@@ -1,0 +1,5 @@
+name = Actency Maps Geocoding
+description = Geocoding Feature for Actency Maps Form
+core = 7.x
+package = VTC
+dependencies = actency_maps
