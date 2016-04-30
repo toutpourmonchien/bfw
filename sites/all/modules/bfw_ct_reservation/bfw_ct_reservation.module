@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the BFW CT Reservation feature.
+ */
+
+include_once 'bfw_ct_reservation.features.inc';
