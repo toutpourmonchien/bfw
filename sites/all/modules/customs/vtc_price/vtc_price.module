@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function vtc_price_menu() {
+  $items['admin/vtc/price'] = array(
+    'title' => t('Configurer les prix'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vtc_price_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'vtc_price.admin.inc'
+  );
+
+  return $items;
+}
+
+function vtc_price_generate_price($forfait, $unit, $km) {
+  $price = $forfait + ($unit * $km);
+  $return = vtc_price_add_return($km, $unit);
+  $price = $price + $return;
+  return $price;
+}
+
+function vtc_price_unit_price_by_hour($hour) {
+  $unit_price = 0.4;
+  if ($hour >= 8 && $hour <= 16) {
+    $unit_price = variable_get('vtc_unit_price_by_km', 0.4);
+  }
+  else {
+    $unit_price = variable_get('vtc_unit_price_by_km2', 0.8);
+  }
+  return $unit_price;
+}
+
+function vtc_price_add_return($km, $unit) {
+  if ($km > 50) {
+    $price = round((($km * $unit ) / 4), 1);
+    return $price;
+  }
+  else {
+    return 0;
+  }
+}

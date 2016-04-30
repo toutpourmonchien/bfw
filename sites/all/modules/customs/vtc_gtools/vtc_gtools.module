@@ -1,0 +1,42 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ */
+function vtc_gtools_menu() {
+  $items['admin/vtc/gtools'] = array(
+    'title' => t('Configure VTC Gtools'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vtc_gtools_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'vtc_gtools.admin.inc'
+  );
+
+  return $items;
+}
+
+function vtc_gtools_api_helper() {
+  return array(
+    'distancematrix' => 'https://maps.googleapis.com/maps/api/distancematrix/',
+    'places' => 'https://maps.googleapis.com/maps/api/place/autocomplete/',
+  );
+
+}
+
+function vtc_gtools_get_km_beetween_two_places($start, $end) {
+  $apis = vtc_gtools_api_helper();
+  $api_url = $apis['distancematrix'];
+  $format = variable_get('vtc_api_output');
+  $fullUrl = $api_url.$format;
+  $query = array(
+    'origins' => $start,
+    'destinations' => $end,
+    'key' => variable_get('vtc_api_key_distancematrix'),
+  );
+
+  $url = url($fullUrl, array('query' => $query));
+  $response = file_get_contents($url);
+  $data = json_decode($response);
+  return $data;
+}

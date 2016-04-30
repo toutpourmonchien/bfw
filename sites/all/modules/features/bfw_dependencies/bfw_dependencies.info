@@ -1,0 +1,14 @@
+name = BFW Dependencies
+core = 7.x
+package = General
+version = 7.x-1.0
+dependencies[] = ctools
+dependencies[] = entity
+dependencies[] = jquery_update
+dependencies[] = token
+dependencies[] = views
+dependencies[] = vtc_devis
+dependencies[] = vtc_gtools
+dependencies[] = vtc_price
+features[features_api][] = api:2
+project path = sites/all/modules/features

@@ -1,0 +1,5 @@
+name = VTC Devis
+description = Feature for Generate Calculation of Price
+core = 7.x
+version = 7.x-1.0
+package = VTC

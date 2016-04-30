@@ -158,3 +158,5 @@ function views_php_views_post_build($view) {
     $view->build_info['query']->range();
   }
 }
+
+
