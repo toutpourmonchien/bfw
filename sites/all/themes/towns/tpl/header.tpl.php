@@ -14,7 +14,7 @@
 
 	<div class="row-fluid">
 		<div class="logo_container">
-			<a href="#top"><div id="logo"><img src="<?php print $logo; ?>" alt="<?php print $site_name; ?>"></div></a>
+			<a href="#top"><?php print $site_name; ?></a>
 		</div>
 		<a href="#responsive_nav" class="menu_trigger"><i class="fa_icon icon-reorder icon-2x"></i></a>
 		<?php if($page['main_menu']) print render($page['main_menu']); ?>
