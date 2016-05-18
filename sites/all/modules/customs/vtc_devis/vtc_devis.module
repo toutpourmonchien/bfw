@@ -45,36 +45,36 @@ function vtc_devis_form($form, &$form_state) {
   $form['firstname'] = array(
     '#type' => 'textfield',
     '#required' => true,
-    '#title' => t('Firstname'),
+    '#title' => t('Prénom'),
     '#title_display' => 'invisible',
     '#field_prefix' => '<div class="span3">',
     '#field_suffix' => '</div>',
     '#attributes' => array(
-      'placeholder' => t('Firstname'),
+      'placeholder' => t('Prénom'),
     ),
   );
 
   $form['lastname'] = array(
     '#type' => 'textfield',
     '#required' => true,
-    '#title' => t('Lastname'),
+    '#title' => t('Nom'),
     '#title_display' => 'invisible',
     '#field_prefix' => '<div class="span3">',
     '#field_suffix' => '</div>',
     '#attributes' => array(
-      'placeholder' => t('Lastname'),
+      'placeholder' => t('Nom'),
     ),
   );
 
   $form['phone'] = array(
     '#type' => 'textfield',
     '#required' => true,
-    '#title' => t('Phone number'),
+    '#title' => t('Téléphone'),
     '#title_display' => 'invisible',
     '#field_prefix' => '<div class="span3">',
     '#field_suffix' => '</div>',
     '#attributes' => array(
-      'placeholder' => t('Phone number'),
+      'placeholder' => t('Téléphone'),
     ),
   );
 
@@ -92,11 +92,11 @@ function vtc_devis_form($form, &$form_state) {
 
   $form['from'] = array(
     '#type' => 'textfield',
-    '#title' => t('Start Address'),
+    '#title' => t('Adresse de départ'),
     '#title_display' => 'invisible',
     '#autocomplete_path' => 'actency-maps/autocomplete',
     '#attributes' => array(
-      'placeholder' => t('Start Address'),
+      'placeholder' => t('Adresse de départ'),
     ),
     '#field_prefix' => '<div class="span6">',
     '#field_suffix' => '</div>',
@@ -106,11 +106,11 @@ function vtc_devis_form($form, &$form_state) {
 
   $form['to'] = array(
     '#type' => 'textfield',
-    '#title' => t('End Address'),
+    '#title' => t("Adresse d'arrivée"),
     '#title_display' => 'invisible',
     '#autocomplete_path' => 'actency-maps/autocomplete',
     '#attributes' => array(
-      'placeholder' => t('End Address'),
+      'placeholder' => t("Adresse d'arrivée"),
     ),
     '#field_prefix' => '<div class="span6">',
     '#field_suffix' => '</div>',
@@ -145,17 +145,17 @@ function vtc_devis_form($form, &$form_state) {
     '#date_increment' => 15,
     '#default_value' => '',
     '#required' => true,
-    '#field_prefix' => '<div class="span3">',
+    '#field_prefix' => '<div class="span6">',
     '#field_suffix' => '</div>',
   );
 
   $form['nb_personnes'] = array(
     '#type' => 'textfield',
     '#required' => true,
-    '#title' => t('Number of persons'),
+    '#title' => t('Nombre de voyageurs'),
     '#title_display' => 'invisible',
     '#attributes' => array(
-      'placeholder' => t('Number of persons'),
+      'placeholder' => t('Nombre de voyageurs'),
     ),
     '#field_prefix' => '<div class="span3">',
     '#field_suffix' => '</div>',
@@ -164,10 +164,10 @@ function vtc_devis_form($form, &$form_state) {
   $form['nb_bagages'] = array(
     '#type' => 'textfield',
     '#required' => true,
-    '#title' => t('Number of suitcases'),
+    '#title' => t('Nombre de bagages'),
     '#title_display' => 'invisible',
     '#attributes' => array(
-      'placeholder' => t('Number of suitcases'),
+      'placeholder' => t('Nombre de bagages'),
     ),
     '#field_prefix' => '<div class="span3">',
     '#field_suffix' => '</div>',
@@ -175,10 +175,10 @@ function vtc_devis_form($form, &$form_state) {
 
   $form['message'] = array(
     '#type' => 'textarea',
-    '#title' => t('Your message'),
+    '#title' => t('Votre message'),
     '#title_display' => 'invisible',
     '#attributes' => array(
-      'placeholder' => t('Type your message here'),
+      'placeholder' => t('Votre commentaire'),
     ),
     '#field_prefix' => '<div class="span12">',
     '#field_suffix' => '</div>',
@@ -216,6 +216,15 @@ function vtc_devis_form($form, &$form_state) {
   );
 
   $form['suf']['#markup'] = '</div>';
+  $form['#after_build'][] = '_vtc_devis_form_after_build';
+  return $form;
+}
+
+function _vtc_devis_form_after_build(&$form, &$form_state) {
+  $form['time']['hour']['#options'][''] = t('Heure');
+  $form['time']['hour']['#suffix'] = '<div class="add-suf">'.t('h').'</div>';
+  $form['time']['minute']['#options'][''] = t('Minute');
+  $form['time']['minute']['#suffix'] = '<div class="add-suf">'.t('min').'</div>';
   return $form;
 }
 
